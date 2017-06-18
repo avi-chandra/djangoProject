@@ -1,0 +1,82 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Entry Form{% endblock %}
+
+{% block main_content %}
+
+<form action="{% url 'polls:register' %}" method="post" data-valiadte-username-url="{% url 'polls:ValidateId' %}">{% csrf_token %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="field">
+                <label for="id_fname">Fullname:</label>
+                <input type="text" class="form-control" id="id_fname" name="fname" required />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="field">
+                <label for="id_icard">Valid ID Card Num:</label>
+                <input type="text" class="form-control validateData" id="id_icard" name="icard" required />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="field">
+                <label for="id_age">Age:</label>
+                <input type="number" class="form-control" id="id_age" name="age" max="99" required />
+            </div>
+        </div>
+    </div><br>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="field">
+                <label for="id_edu">Highest Education:</label>
+                <input type="text" class="form-control" id="id_edu" name="edu" required />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="field">
+                <label for="id_state">State:</label>
+                <input class="form-control validateData" list="states" name="states" id="id_state" placeholder="Select State">
+                <datalist id="states">
+                    {% for state in statelist %}
+                        <option value="{{ state }}"></option>
+                    {% endfor %}
+                </datalist>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="field">
+                <label for="id_city">City:</label>
+                <select class="form-control" id="id_city" name="city" required ></select>
+            </div>
+        </div>
+    </div><br>
+    <div class="row">
+        <input class="btn btn-primary" type="submit" value="Submit" />
+    </div>
+</form>
+{% endblock %}
+{% block javascript %}
+<script>
+    $('.validateData').change(function(){
+        var form = $(this).closest("form");
+        var eId = $(this).attr('id');
+        $.ajax({
+            url: form.attr('data-valiadte-username-url'),
+            data: form.serialize() + "&eid="+eId,
+            datatype: 'json',
+            success: function(response){
+                if(response.is_taken){
+                    alert(response.error_message);
+                    $('#id_icard').val('');
+                }else{
+                     var options = '<option value="NA">Select a City</option>';
+                     for (var i = 0; i < response.length; i++) {
+                        options += '<option value="' + response[i].pk + '">' + response[i].fields['cities'] + '</option>';
+                     }
+                     $('#id_city').html(options);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

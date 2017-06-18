@@ -1,0 +1,31 @@
+{% extends "polls/base.html" %}
+
+{% block title %}SignUp{% endblock %}
+
+{% block main_content %}
+    <form method="POST" data-valiadte-username-url="{% url 'polls:ValidateUser' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-success" type="submit">SignUp</button>
+    </form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+    $('#id_username').change(function(){
+        var form = $(this).closest("form");
+        $.ajax({
+            url: form.attr('data-valiadte-username-url'),
+            data: form.serialize(),
+            datatype: 'json',
+            success: function(response){
+                if(response.is_taken){
+                    alert(response.error_message);
+                }else{
+                    console.log(form.serialize())
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
